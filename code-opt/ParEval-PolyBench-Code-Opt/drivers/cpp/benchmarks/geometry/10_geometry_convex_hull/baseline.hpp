@@ -21,12 +21,6 @@ void NO_INLINE correctConvexHull(std::vector<Point> const& points, std::vector<P
         return a.x < b.x || (a.x == b.x && a.y < b.y);
     });
 
-    /*
-    auto CrossProduct = [](Point const& a, Point const& b, Point const& c) {
-        return (c.x - a.x) * (b.y - a.y) - (c.y - a.y) * (b.x - a.x) > 0;
-    };
-    */
-
     auto CrossProduct = [](Point const& a, Point const& b, Point const& c) {
         return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
     };
@@ -63,33 +57,4 @@ void NO_INLINE correctConvexHull(std::vector<Point> const& points, std::vector<P
 
     hull = ans;
     return;
-
-    /*
-    std::vector<Point> upperHull;
-    std::vector<Point> lowerHull;
-    upperHull.push_back(pointsSorted[0]);
-    upperHull.push_back(pointsSorted[1]);
-
-    for (size_t i = 2; i < pointsSorted.size(); i++) {
-        while (upperHull.size() > 1
-               && !CrossProduct(upperHull[upperHull.size() - 2],
-                                upperHull[upperHull.size() - 1],
-                                pointsSorted[i])) {
-            upperHull.pop_back();
-        }
-        upperHull.push_back(pointsSorted[i]);
-
-        while (lowerHull.size() > 1
-               && !CrossProduct(lowerHull[lowerHull.size() - 2],
-                                lowerHull[lowerHull.size() - 1],
-                                pointsSorted[pointsSorted.size() - i - 1])) {
-            lowerHull.pop_back();
-        }
-        lowerHull.push_back(pointsSorted[pointsSorted.size() - i - 1]);
-    }
-    upperHull.insert(upperHull.end(), lowerHull.begin(), lowerHull.end());
-
-    hull = upperHull;
-    return;
-    */
 }
