@@ -21,12 +21,6 @@ double NO_INLINE correctConvexHullPerimeter(std::vector<Point> const& points) {
         return a.x < b.x || (a.x == b.x && a.y < b.y);
     });
 
-    /*
-    auto CrossProduct = [](Point const& a, Point const& b, Point const& c) {
-        return (c.x - a.x) * (b.y - a.y) - (c.y - a.y) * (b.x - a.x);
-    };
-    */
-
     auto CrossProduct = [](Point const& a, Point const& b, Point const& c) {
         return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
     };
@@ -35,7 +29,6 @@ double NO_INLINE correctConvexHullPerimeter(std::vector<Point> const& points) {
         return sqrt(pow(p2.x-p1.x, 2) + pow(p2.y-p1.y, 2));
     };
 
-    // Implementation taken from https://www.geeksforgeeks.org/perimeter-of-convex-hull-for-a-given-set-of-points/
     std::vector<Point> ans(2 * pointsSorted.size());
 
     int n = points.size();
@@ -77,38 +70,4 @@ double NO_INLINE correctConvexHullPerimeter(std::vector<Point> const& points) {
     perimeter += dist(ans[0], ans[ans.size() - 1]);
 
     return perimeter;
-
-    /*
-    std::vector<Point> upperHull;
-    std::vector<Point> lowerHull;
-    upperHull.push_back(pointsSorted[0]);
-    upperHull.push_back(pointsSorted[1]);
-
-    for (size_t i = 2; i < pointsSorted.size(); i++) {
-        while (upperHull.size() > 1
-               && !CrossProduct(upperHull[upperHull.size() - 2],
-                                upperHull[upperHull.size() - 1],
-                                pointsSorted[i])) {
-            upperHull.pop_back();
-        }
-        upperHull.push_back(pointsSorted[i]);
-
-        while (lowerHull.size() > 1
-               && !CrossProduct(lowerHull[lowerHull.size() - 2],
-                                lowerHull[lowerHull.size() - 1],
-                                pointsSorted[pointsSorted.size() - i - 1])) {
-            lowerHull.pop_back();
-        }
-        lowerHull.push_back(pointsSorted[pointsSorted.size() - i - 1]);
-    }
-    upperHull.insert(upperHull.end(), lowerHull.begin(), lowerHull.end());
-
-    double perimeter = 0;
-    for (size_t i = 0; i < upperHull.size() - 1; i++) {
-        perimeter += dist(upperHull[i], upperHull[i+1]);
-    }
-    perimeter += dist(upperHull[0], upperHull[upperHull.size() - 1]);
-
-    return perimeter;
-    */
 }

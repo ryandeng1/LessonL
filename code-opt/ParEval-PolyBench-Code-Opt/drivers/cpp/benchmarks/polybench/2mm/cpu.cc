@@ -116,7 +116,7 @@ bool validate(Context *ctx, std::mt19937& engine) {
     std::vector<std::vector<double>> A;
     std::vector<std::vector<double>> B;
     std::vector<std::vector<double>> C;
-    std::vector<std::vector<double>> tmp;
+    std::vector<std::vector<double>> tmp, tmp_test;
 
     std::vector<std::vector<double>> D_correct;
     std::vector<std::vector<double>> D_test;
@@ -125,6 +125,7 @@ bool validate(Context *ctx, std::mt19937& engine) {
     B.resize(nk);
     C.resize(nj);
     tmp.resize(ni);
+    tmp_test.resize(ni);
 
     D_correct.resize(ni);
     D_test.resize(ni);
@@ -148,6 +149,7 @@ bool validate(Context *ctx, std::mt19937& engine) {
 
     for (int i = 0; i < ni; i++) {
 	tmp[i].resize(nj);
+	tmp_test[i].resize(nj);
     }
 
     double alpha = 1.5;
@@ -183,7 +185,7 @@ bool validate(Context *ctx, std::mt19937& engine) {
     correct_kernel_2mm(ni, nj, nk, nl, alpha, beta, tmp, A, B, C, D_correct);
 
     // compute test result
-    submission::kernel_2mm(ni, nj, nk, nl, alpha, beta, tmp, A, B, C, D_test);
+    submission::kernel_2mm(ni, nj, nk, nl, alpha, beta, tmp_test, A, B, C, D_test);
         
     bool isCorrect = true;
     for (int i = 0; i < ni; i++) {

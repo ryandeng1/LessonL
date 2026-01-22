@@ -20,7 +20,7 @@ def create_generation_dict(problem_category: str, problem_unique_id: str, optimi
 
     return [d]
 
-def run_driver(gen_file: str, problem_sizes_file: str = "problem-sizes.json", run_timeout: int = 300, launch_configs: str = "launch-configs-speedcode.json") -> str:
+def run_driver(gen_file: str, problem_sizes_file: str = "problem-sizes.json", run_timeout: int = 1800, launch_configs: str = "launch-configs-speedcode.json") -> str:
     # delete set to False as need this file in another function
     with tempfile.NamedTemporaryFile(suffix=".json") as output_f:
         args = f"python run-all.py {gen_file} -o {output_f.name} --yes-to-all --problem-sizes {problem_sizes_file} --run-timeout {run_timeout} --launch-configs {launch_configs} --code_opt True"

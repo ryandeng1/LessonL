@@ -108,7 +108,6 @@ bool validate(Context *ctx, std::mt19937& engine) {
     for (int i = 0; i < n; i++) {
 	for (int j = 0; j < n; j++) {
 	    if (table_correct[i][j] != table_test[i][j]) {
-		std::cout << "idx: " << i << " " << j << " correct: " << table_correct[i][j] << " test: " << table_test[i][j] << std::endl;
 		isCorrect = false;
 		break;
 	    }

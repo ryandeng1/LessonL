@@ -121,15 +121,16 @@ bool validate(Context *ctx, std::mt19937& engine) {
     int nl = TEST_SIZE / 8;
     int nm = TEST_SIZE / 16;
 
-    std::vector<std::vector<double>> A, B, C, D, E, F, G;
-    std::vector<std::vector<double>> G_test;
+    std::vector<std::vector<double>> A, B, C, D, E, E_test, F, F_test, G, G_test;
 
     A.resize(ni);
     B.resize(nk);
     C.resize(nj);
     D.resize(nm);
     E.resize(ni);
+    E_test.resize(ni);
     F.resize(nj);
+    F_test.resize(nj);
     G.resize(ni);
     G_test.resize(ni);
 
@@ -151,10 +152,12 @@ bool validate(Context *ctx, std::mt19937& engine) {
 
     for (int i = 0; i < ni; i++) {
 	E[i].resize(nj);
+	E_test[i].resize(nj);
     }
 
     for (int i = 0; i < nj; i++) {
 	F[i].resize(nl);
+	F_test[i].resize(nl);
     }
 
     for (int i = 0; i < ni; i++) {
@@ -191,7 +194,7 @@ bool validate(Context *ctx, std::mt19937& engine) {
     correct_kernel_3mm(ni, nj, nk, nl, nm, E, A, B, F, C, D, G);
 
     // compute test result
-    submission::kernel_3mm(ni, nj, nk, nl, nm, E, A, B, F, C, D, G_test);
+    submission::kernel_3mm(ni, nj, nk, nl, nm, E_test, A, B, F_test, C, D, G_test);
         
     bool isCorrect = true;
     for (int i = 0; i < ni; i++) {

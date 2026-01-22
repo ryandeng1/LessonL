@@ -85,7 +85,7 @@ bool validate(Context *ctx, std::mt19937& engine) {
     std::vector<std::vector<double>> A;
     std::vector<std::vector<double>> B;
 
-    std::vector<double> tmp, x, y, y_test;
+    std::vector<double> tmp, tmp_test, x, y, y_test;
 
     A.resize(n);
     B.resize(n);
@@ -95,6 +95,7 @@ bool validate(Context *ctx, std::mt19937& engine) {
     }
 
     tmp.resize(n);
+    tmp_test.resize(n);
     x.resize(n);
     y.resize(n);
     y_test.resize(n);
@@ -118,7 +119,7 @@ bool validate(Context *ctx, std::mt19937& engine) {
     correct_kernel_gesummv(n, alpha, beta, A, B, tmp, x, y);
 
     // compute test result
-    submission::kernel_gesummv(n, alpha, beta, A, B, tmp, x, y_test);
+    submission::kernel_gesummv(n, alpha, beta, A, B, tmp_test, x, y_test);
     
     bool isCorrect = true;
 
