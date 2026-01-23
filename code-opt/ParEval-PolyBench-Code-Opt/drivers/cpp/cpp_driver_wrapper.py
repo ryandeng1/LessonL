@@ -45,6 +45,7 @@ COMPILER_SETTINGS = {
     "hip": {"CXX": "hipcc", "CXXFLAGS": "-std=c++17 -O3 -Xcompiler \"-std=c++17\" -Xcompiler \"-O3\" -Wno-unused-result"}
 }
 
+"""
 def wrap_with_namespace_gpt(code: str, namespace="submission") -> str:
     lines = code.splitlines(keepends=True)  # Keep line endings intact
 
@@ -73,6 +74,114 @@ def wrap_with_namespace_gpt(code: str, namespace="submission") -> str:
             if len(line) - len(line.lstrip()) <= struct_indent and stripped != "":
                 in_struct = False
             output.append(line)
+            continue
+
+        # Everything else goes inside the namespace
+        namespace_code.append(line)
+
+    # Wrap non-struct code in the namespace
+    if namespace_code:
+        output.append(f"namespace {namespace} {{\n")
+        output.extend(["    " + line if line.strip() else line for line in namespace_code])
+        output.append(f"}} // namespace {namespace}\n")
+
+    return "".join(output)
+"""
+
+def wrap_with_namespace_gpt(code: str, namespace="submission") -> str:
+    lines = code.splitlines(keepends=True)  # Keep line endings intact
+    in_struct = False
+    struct_brace_depth = 0
+    waiting_for_open_brace = False
+    in_block_comment = False
+    output = []
+    namespace_code = []
+
+    for line in lines:
+        stripped = line.lstrip()
+
+        # Track block comment state
+        line_starts_in_comment = in_block_comment
+
+        # Update block comment state for this line
+        temp_line = stripped
+        while '/*' in temp_line or '*/' in temp_line:
+            if '/*' in temp_line:
+                idx = temp_line.find('/*')
+                if '*/' in temp_line[idx:]:
+                    # Single-line comment /* ... */
+                    end_idx = temp_line.find('*/', idx) + 2
+                    temp_line = temp_line[:idx] + temp_line[end_idx:]
+                else:
+                    # Multi-line comment starts
+                    in_block_comment = True
+                    temp_line = temp_line[:idx]
+                    break
+            elif '*/' in temp_line:
+                # Multi-line comment ends
+                idx = temp_line.find('*/')
+                in_block_comment = False
+                temp_line = temp_line[idx + 2:]
+
+        # If entire line was inside a block comment, route appropriately
+        if line_starts_in_comment and in_block_comment:
+            if in_struct:
+                output.append(line)
+            else:
+                namespace_code.append(line)
+            continue
+
+        # Use temp_line (comment-stripped) for pattern matching
+        stripped_no_comments = temp_line.lstrip()
+        code_portion = stripped_no_comments.split("//", 1)[0]
+
+        # Exclude headers, macros, and using statements from the namespace
+        if stripped_no_comments.startswith(("#include", "#define", "using ", "#if", "#endif", "#else", "#elif", "#ifndef", "#ifdef")):
+            output.append(line)
+            continue
+
+        # Only exclude #pragma once, not other pragmas like #pragma omp
+        if stripped_no_comments.startswith("#pragma once"):
+            output.append(line)
+            continue
+
+        # Detect struct start (using comment-stripped version)
+        struct_candidate = (
+            not in_struct
+            and re.match(r'^\s*(?:typedef\s+)?struct\b', code_portion)
+            and not code_portion.startswith("//")
+        )
+        if struct_candidate:
+            has_open_brace = "{" in code_portion
+            has_semicolon = ";" in code_portion
+
+            # Skip bare declarations like `struct Foo;` or `struct Foo bar;`
+            if has_semicolon and not has_open_brace:
+                namespace_code.append(line)
+                continue
+
+            in_struct = True
+            waiting_for_open_brace = not has_open_brace
+            struct_brace_depth = code_portion.count("{") - code_portion.count("}")
+            output.append(line)
+
+            if not waiting_for_open_brace and struct_brace_depth <= 0:
+                in_struct = False
+                struct_brace_depth = 0
+            continue
+
+        if in_struct:
+            output.append(line)
+            brace_line = code_portion
+
+            if waiting_for_open_brace and "{" in brace_line:
+                waiting_for_open_brace = False
+
+            struct_brace_depth += brace_line.count("{") - brace_line.count("}")
+
+            if not waiting_for_open_brace and struct_brace_depth <= 0:
+                in_struct = False
+                struct_brace_depth = 0
             continue
 
         # Everything else goes inside the namespace
@@ -230,6 +339,8 @@ class CppDriverWrapper(DriverWrapper):
 
             if build_result.exit_code != 0:
                 print(f"----- DID NOT BUILD ---- build result stderr: {build_result.stderr}")
+                print("--- code without namespace ---")
+                print(output)
                 print("--- CODE ---")
                 print(output_with_namespace)
 
@@ -276,4 +387,3 @@ class CppDriverWrapper(DriverWrapper):
                         logging.debug(f"Ouputs:\n\tstdout: {run_result.stdout}\n\tstderr: {run_result.stderr}")
         
         return GeneratedTextResult(write_success, build_result, run_results)
-

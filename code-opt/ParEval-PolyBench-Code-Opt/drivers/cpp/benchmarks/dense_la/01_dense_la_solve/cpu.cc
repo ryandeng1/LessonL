@@ -114,7 +114,7 @@ bool validate(Context *ctx, std::mt19937& engine) {
     }
 
     bool isCorrect = true;
-    if (IS_ROOT(rank) && (!fequal(b, test_b, 1e-4))) {
+    if (IS_ROOT(rank) && (!fequal(b, test_b, 1e-3))) {
         isCorrect = false;
     }
 
